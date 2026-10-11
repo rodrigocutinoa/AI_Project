@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101116">
+  <title>Cinefilia — Recomendaciones de películas</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #101116;
+      --surface: #191a22;
+      --surface-raised: #20212a;
+      --text: #f5f3f0;
+      --muted: #9b9ba7;
+      --accent: #f3b34c;
+      --accent-soft: #322716;
+      --border: rgba(255, 255, 255, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 50% -20%, rgba(133, 86, 37, 0.2), transparent 48%),
+        var(--background);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .page-shell {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 76px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-size: 1.1rem;
+      font-weight: 750;
+      letter-spacing: -0.04em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 11px;
+      background: var(--accent);
+      color: #20170c;
+      font-size: 1rem;
+    }
+
+    .header-note {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    main {
+      padding: 66px 0 80px;
+    }
+
+    .intro {
+      max-width: 700px;
+      margin: 0 auto 36px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 750;
+      letter-spacing: 0.19em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.45rem, 6vw, 4.4rem);
+      letter-spacing: -0.065em;
+      line-height: 1.03;
+    }
+
+    .intro-copy {
+      max-width: 510px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .filter-panel {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.4fr) minmax(150px, 1fr) minmax(120px, 0.8fr) minmax(120px, 0.8fr) auto;
+      align-items: end;
+      gap: 14px;
+      margin: 0 auto 40px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(25, 26, 34, 0.88);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      color: #d4d3d9;
+      font-size: 0.78rem;
+      font-weight: 650;
+    }
+
+    .field select,
+    .field input {
+      width: 100%;
+      min-height: 46px;
+      padding: 0 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      background: var(--surface-raised);
+      color: var(--text);
+    }
+
+    .field select:focus,
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(243, 179, 76, 0.14);
+    }
+
+    .reset-button {
+      min-height: 46px;
+      padding: 0 17px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: #e2e0e5;
+      cursor: pointer;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .reset-button:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .results-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      letter-spacing: -0.035em;
+    }
+
+    .result-count {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .movie-card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--surface);
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(243, 179, 76, 0.45);
+    }
+
+    .movie-art {
+      position: relative;
+      display: grid;
+      min-height: 245px;
+      overflow: hidden;
+      place-items: center;
+      isolation: isolate;
+      background: var(--poster-background);
+    }
+
+    .movie-art::before,
+    .movie-art::after {
+      position: absolute;
+      z-index: -1;
+      content: "";
+    }
+
+    .movie-art::before {
+      width: 190px;
+      height: 190px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      box-shadow: 0 0 0 24px rgba(255, 255, 255, 0.035), 0 0 0 48px rgba(255, 255, 255, 0.025);
+    }
+
+    .movie-art::after {
+      inset: auto 0 0;
+      height: 55%;
+      background: linear-gradient(transparent, rgba(9, 10, 14, 0.55));
+    }
+
+    .poster-symbol {
+      color: rgba(255, 255, 255, 0.88);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 5.3rem;
+      font-weight: 400;
+      line-height: 1;
+      text-shadow: 0 5px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .poster-caption {
+      position: absolute;
+      right: 15px;
+      bottom: 13px;
+      left: 15px;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.17em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .movie-info {
+      padding: 15px 15px 17px;
+    }
+
+    .movie-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 9px;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .rating {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .movie-title {
+      overflow: hidden;
+      margin: 0 0 11px;
+      font-size: 1.03rem;
+      letter-spacing: -0.025em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .genre-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .genre-tag {
+      padding: 5px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.045);
+      color: #c3c2cb;
+      font-size: 0.68rem;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 50px 20px;
+      border: 1px dashed var(--border);
+      border-radius: 15px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .empty-state strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      .filter-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .filter-panel .field:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .reset-button {
+        grid-column: 1 / -1;
+      }
+
+      .movie-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page-shell {
+        width: min(100% - 32px, 440px);
+      }
+
+      .site-header {
+        min-height: 66px;
+      }
+
+      .header-note {
+        font-size: 0.75rem;
+      }
+
+      main {
+        padding-top: 48px;
+      }
+
+      .intro {
+        margin-bottom: 28px;
+      }
+
+      .intro-copy {
+        font-size: 0.92rem;
+      }
+
+      .filter-panel {
+        gap: 11px;
+        padding: 15px;
+      }
+
+      .movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+      }
+
+      .movie-art {
+        min-height: 190px;
+      }
+
+      .poster-symbol {
+        font-size: 4.3rem;
+      }
+
+      .movie-info {
+        padding: 12px;
+      }
+
+      .movie-title {
+        font-size: 0.92rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .header-note {
+        display: none;
+      }
+
+      .movie-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .movie-art {
+        min-height: 240px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header page-shell">
+    <a class="brand" href="#" aria-label="Cinefilia, inicio">
+      <span class="brand-mark" aria-hidden="true">▶</span>
+      <span>cinefilia</span>
+    </a>
+    <span class="header-note">Tu próxima película favorita</span>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">Una buena historia te espera</p>
+      <h1 id="page-title">Encuentra tu próxima película</h1>
+      <p class="intro-copy">Explora una selección de grandes películas y filtra por género y año para encontrar justo lo que te apetece ver.</p>
+    </section>
+
+    <form class="filter-panel" id="filters" aria-label="Filtros de películas">
+      <div class="field">
+        <label for="genre-filter">Género</label>
+        <select id="genre-filter" name="genre">
+          <option value="">Todos los géneros</option>
+          <option value="Acción">Acción</option>
+          <option value="Animación">Animación</option>
+          <option value="Aventura">Aventura</option>
+          <option value="Ciencia ficción">Ciencia ficción</option>
+          <option value="Comedia">Comedia</option>
+          <option value="Drama">Drama</option>
+          <option value="Fantasía">Fantasía</option>
+          <option value="Romance">Romance</option>
+          <option value="Suspenso">Suspenso</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="year-from">Desde el año</label>
+        <input id="year-from" name="year-from" type="number" min="1900" max="2026" placeholder="Ej. 2000" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label for="year-to">Hasta el año</label>
+        <input id="year-to" name="year-to" type="number" min="1900" max="2026" placeholder="Ej. 2020" inputmode="numeric">
+      </div>
+      <button class="reset-button" type="reset">Limpiar filtros</button>
+    </form>
+
+    <section aria-labelledby="results-title">
+      <div class="results-heading">
+        <h2 id="results-title">Recomendadas para ti</h2>
+        <span class="result-count" id="result-count" aria-live="polite"></span>
+      </div>
+      <div class="movie-grid" id="movie-grid"></div>
+      <div class="empty-state" id="empty-state" role="status" hidden>
+        <strong>No encontramos películas con esos filtros</strong>
+        Prueba con otro género o amplía el rango de años.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const movies = [
+      { title: "Interestelar", year: 2014, rating: "8.7", genres: ["Ciencia ficción", "Aventura", "Drama"], symbol: "✦", caption: "Más allá de las estrellas", colors: ["#182e47", "#54798b"] },
+      { title: "El viaje de Chihiro", year: 2001, rating: "8.6", genres: ["Animación", "Aventura", "Fantasía"], symbol: "千", caption: "Un mundo encantado", colors: ["#244943", "#75a77e"] },
+      { title: "Parásitos", year: 2019, rating: "8.5", genres: ["Suspenso", "Drama", "Comedia"], symbol: "家", caption: "Una historia de contrastes", colors: ["#263b32", "#71866b"] },
+      { title: "La La Land", year: 2016, rating: "8.0", genres: ["Romance", "Drama", "Comedia"], symbol: "♪", caption: "Una historia de amor", colors: ["#522c63", "#e28b69"] },
+      { title: "El origen", year: 2010, rating: "8.8", genres: ["Ciencia ficción", "Acción", "Suspenso"], symbol: "◈", caption: "La mente es el escenario", colors: ["#273444", "#758493"] },
+      { title: "Coco", year: 2017, rating: "8.4", genres: ["Animación", "Aventura", "Fantasía"], symbol: "✿", caption: "La música vive para siempre", colors: ["#70362f", "#e89f48"] },
+      { title: "Mad Max: Furia en el camino", year: 2015, rating: "8.1", genres: ["Acción", "Aventura", "Ciencia ficción"], symbol: "☼", caption: "El camino hacia la libertad", colors: ["#63382b", "#d38646"] },
+      { title: "Amélie", year: 2001, rating: "8.3", genres: ["Romance", "Comedia"], symbol: "♥", caption: "Pequeñas grandes alegrías", colors: ["#315040", "#d19850"] },
+      { title: "El gran hotel Budapest", year: 2014, rating: "8.1", genres: ["Comedia", "Aventura", "Drama"], symbol: "✧", caption: "Un hotel fuera de lo común", colors: ["#603b4e", "#d58079"] },
+      { title: "Spider-Man: Un nuevo universo", year: 2018, rating: "8.4", genres: ["Animación", "Acción", "Aventura"], symbol: "蜘蛛", caption: "Más de un héroe", colors: ["#491e37", "#ce4352"] },
+      { title: "El silencio de los inocentes", year: 1991, rating: "8.6", genres: ["Suspenso", "Drama"], symbol: "☽", caption: "Un clásico del suspenso", colors: ["#303044", "#777394"] },
+      { title: "Orgullo y prejuicio", year: 2005, rating: "7.8", genres: ["Romance", "Drama"], symbol: "❧", caption: "Una historia inolvidable", colors: ["#40533c", "#bb9668"] }
+    ];
+
+    const form = document.querySelector("#filters");
+    const genreFilter = document.querySelector("#genre-filter");
+    const yearFrom = document.querySelector("#year-from");
+    const yearTo = document.querySelector("#year-to");
+    const movieGrid = document.querySelector("#movie-grid");
+    const resultCount = document.querySelector("#result-count");
+    const emptyState = document.querySelector("#empty-state");
+
+    function renderMovies() {
+      const selectedGenre = genreFilter.value;
+      const from = yearFrom.value === "" ? null : Number(yearFrom.value);
+      const to = yearTo.value === "" ? null : Number(yearTo.value);
+      const filteredMovies = movies.filter((movie) => {
+        const matchesGenre = !selectedGenre || movie.genres.includes(selectedGenre);
+        const matchesFrom = from === null || movie.year >= from;
+        const matchesTo = to === null || movie.year <= to;
+        return matchesGenre && matchesFrom && matchesTo;
+      });
+
+      movieGrid.innerHTML = filteredMovies.map((movie) => `
+        <article class="movie-card">
+          <div class="movie-art" role="img" aria-label="Diseño artístico para ${movie.title}" style="--poster-background: linear-gradient(145deg, ${movie.colors[0]}, ${movie.colors[1]})">
+            <span class="poster-symbol" aria-hidden="true">${movie.symbol}</span>
+            <span class="poster-caption">${movie.caption}</span>
+          </div>
+          <div class="movie-info">
+            <div class="movie-meta">
+              <span>${movie.year}</span>
+              <span class="rating" aria-label="Calificación ${movie.rating} de 10">★ ${movie.rating}</span>
+            </div>
+            <h3 class="movie-title">${movie.title}</h3>
+            <div class="genre-list" aria-label="Géneros">
+              ${movie.genres.map((genre) => `<span class="genre-tag">${genre}</span>`).join("")}
+            </div>
+          </div>
+        </article>
+      `).join("");
+
+      const total = filteredMovies.length;
+      resultCount.textContent = `${total} ${total === 1 ? "película" : "películas"}`;
+      emptyState.hidden = total !== 0;
+      movieGrid.hidden = total === 0;
+    }
+
+    form.addEventListener("input", renderMovies);
+    form.addEventListener("change", renderMovies);
+    form.addEventListener("reset", () => requestAnimationFrame(renderMovies));
+
+    renderMovies();
+  </script>
+</body>
+</html>
